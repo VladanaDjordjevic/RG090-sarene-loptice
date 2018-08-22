@@ -1,4 +1,6 @@
 #include <GL/glut.h>
+#include <time.h>
+#include <stdlib.h>
 #define TIMER_ID1 1
 #define TIMER_ID2 2
 #define TIMER_ID3 3
@@ -17,9 +19,12 @@ static void on_timer2(int value);
 static void on_timer3(int value);
 static void set_material(int num);
 
-static moving = 0;
-static  animation_ongoing = 0;
+static int animation_ongoing = 0;
+static float animation_parametar_moving = 0;
+static int animation_parametar_making = 1;
+static int x_coor_cone = 0;
 
+static int moving = 0;
 static float moving_parametar = 0;
 static float curr_x = 0;
 
@@ -37,6 +42,7 @@ int main(int argc, char **argv)
     glutReshapeFunc(on_reshape);
     glutDisplayFunc(on_display);
     
+    srand(time(NULL));
     init_light();
 
     glutMainLoop();
@@ -75,7 +81,7 @@ static void on_keyboard(unsigned char key, int x, int y)
     case 's':
     case 'S'://star of animation, moving of cones
         if(!animation_ongoing){
-            //glutTimerFunc(TIMER_INTERVAL1, on_timer1, TIMER_ID1);
+            glutTimerFunc(TIMER_INTERVAL1, on_timer1, TIMER_ID1);
             animation_ongoing = 1;
         }
         break;
@@ -92,6 +98,22 @@ static void on_keyboard(unsigned char key, int x, int y)
             moving = 1;
         }
         break;
+    }
+}
+static void on_timer1(int value){
+    if(TIMER_ID1 != value)
+        return;
+    
+    animation_parametar_moving += 0.2;
+
+    if(animation_parametar_moving>=7){
+        animation_parametar_moving = 0;
+        animation_parametar_making = 1;
+    }
+    
+    glutPostRedisplay();
+    if(animation_ongoing){
+        glutTimerFunc(TIMER_ID1, on_timer1, TIMER_ID1);
     }
 }
 //function to move to the left, decreasing x coordinates
@@ -166,6 +188,10 @@ static void set_material(int num){
         case 3://green, for sphere, start color
             diffuse_coeffs[1] = 1;
             break;
+        case 4://purple, for cones
+            diffuse_coeffs[0] = 1;
+            diffuse_coeffs[2] = 1;
+            break;
     }
 
     glMaterialfv(GL_FRONT, GL_AMBIENT, ambient_coeffs);
@@ -222,6 +248,26 @@ static void on_display(void)
             set_material(3);
             glTranslatef(0+curr_x, 1.75, 3.25);
             glutSolidSphere(0.5, 50, 50);
+        glPopMatrix();
+        glPushMatrix();
+            set_material(4);
+            if(animation_ongoing){
+                if(animation_parametar_making){
+                    float rand_value = rand()/(float)RAND_MAX;
+                    if(rand_value<=0.33){
+                        x_coor_cone = -2;
+                    }
+                    else if(rand_value>=0.66){
+                        x_coor_cone = 2;
+                    }
+                    else{
+                        x_coor_cone = 0;
+                    }
+                    animation_parametar_making = 0;
+                }
+                glTranslatef(x_coor_cone, 1.25, -4.5+animation_parametar_moving);
+                glutSolidCone(0.1,0.5,20,20);
+            }
         glPopMatrix();
     glPopMatrix();
     glutSwapBuffers();

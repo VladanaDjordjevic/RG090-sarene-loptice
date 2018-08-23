@@ -1,6 +1,7 @@
 #include <GL/glut.h>
 #include <time.h>
 #include <stdlib.h>
+#include <stdio.h>
 #define TIMER_ID1 1
 #define TIMER_ID2 2
 #define TIMER_ID3 3
@@ -20,13 +21,16 @@ static void on_timer3(int value);
 static void set_material(int num);
 
 static int animation_ongoing = 0;
-static float animation_parametar_moving = 0;
-static int animation_parametar_making = 1;
+static float animation_parameter_moving = 0;
+static int animation_parameter_making = 1;
 static int x_coor_cone = 0;
+static int number_of_cones = 0;
 
 static int moving = 0;
-static float moving_parametar = 0;
+static float moving_parameter = 0;
 static float curr_x = 0;
+
+static void show_message();
 
 int main(int argc, char **argv)
 {
@@ -98,17 +102,28 @@ static void on_keyboard(unsigned char key, int x, int y)
             moving = 1;
         }
         break;
+    case 'r':
+    case 'R'://restart of animation by restarting all parameters
+        animation_ongoing = 0;
+        moving = 0;
+        moving_parameter = 0;
+        animation_parameter_moving = 0;
+        number_of_cones = 0;
+        curr_x = 0;
+        glutPostRedisplay();
+        break;
     }
 }
 static void on_timer1(int value){
     if(TIMER_ID1 != value)
         return;
     
-    animation_parametar_moving += 0.2;
+    animation_parameter_moving += 0.2;
 
-    if(animation_parametar_moving>=7){
-        animation_parametar_moving = 0;
-        animation_parametar_making = 1;
+    if(animation_parameter_moving>=7){
+        animation_parameter_moving = 0;
+        animation_parameter_making = 1;
+        number_of_cones += 1; 
     }
     
     glutPostRedisplay();
@@ -121,11 +136,11 @@ static void on_timer2(int value){
     if(TIMER_ID2 != value)
         return;
     
-    moving_parametar -= 0.2;
+    moving_parameter -= 0.2;
     curr_x -= 0.2;
-    if(moving_parametar<=-2){
+    if(moving_parameter<=-2){
         moving = 0;
-        moving_parametar = 0;
+        moving_parameter = 0;
     }
     //limited movement so that the ball does not go off the track
     if(curr_x<=-2)
@@ -141,11 +156,11 @@ static void on_timer3(int value){
     if(TIMER_ID3 != value)
         return;
     
-    moving_parametar += 0.2;
+    moving_parameter += 0.2;
     curr_x += 0.2;
-    if(moving_parametar>=2){
+    if(moving_parameter>=2){
         moving = 0;
-        moving_parametar = 0;
+        moving_parameter = 0;
     }
     
     //limited movement so that the ball does not go off the track
@@ -200,6 +215,11 @@ static void set_material(int num){
     glMaterialf(GL_FRONT, GL_SHININESS, shininess);
 }
 
+static void show_message()
+{
+    //TODO:to show poins and message
+}
+
 static void on_display(void)
 {
     //delete previous contents of the window
@@ -210,7 +230,7 @@ static void on_display(void)
     glLoadIdentity();
     gluLookAt(0, 7, 7, 0, 0, 0, 0, 1, 0);
     
-    //light position
+    //light positiongrafika
     GLfloat light_position[] = { 10, 10, 10, 0 };
     glLightfv(GL_LIGHT0, GL_POSITION, light_position);
 
@@ -251,9 +271,9 @@ static void on_display(void)
         glPopMatrix();
         glPushMatrix();
             set_material(4);
-            if(animation_ongoing){
-                if(animation_parametar_making){
-                    float rand_value = rand()/(float)RAND_MAX;
+            if(animation_ongoing){//when animation is active we make cones
+                if(animation_parameter_making){//when one cone is gone we make another one on random track using rand() function
+                    float rand_value = rand()/(float)RAND_MAX;//value is in [0,1] interval
                     if(rand_value<=0.33){
                         x_coor_cone = -2;
                     }
@@ -263,10 +283,15 @@ static void on_display(void)
                     else{
                         x_coor_cone = 0;
                     }
-                    animation_parametar_making = 0;
+                    animation_parameter_making = 0;
                 }
-                glTranslatef(x_coor_cone, 1.25, -4.5+animation_parametar_moving);
+                glTranslatef(x_coor_cone, 1.25, -4.5+animation_parameter_moving);//decreasing z-ose
                 glutSolidCone(0.1,0.5,20,20);
+                //stop of animation when sphere and cone come to contant
+                if(abs(x_coor_cone - curr_x)<=0.5 && animation_parameter_moving >= 6.0){
+                    animation_ongoing = 0;
+                    //show_message();
+                }
             }
         glPopMatrix();
     glPopMatrix();

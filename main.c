@@ -20,17 +20,16 @@ static void on_timer2(int value);
 static void on_timer3(int value);
 static void set_material(int num);
 
-static int animation_ongoing = 0;
-static float animation_parameter_moving = 0;
-static int animation_parameter_making = 1;
+static int animation_ongoing = 0;//to start animation
+static float animation_parameter_moving = 0;//to move cone
+static int animation_parameter_making = 1;//making cone
 static int x_coor_cone = 0;
 static int number_of_cones = 0;
 
-static int moving = 0;
+static int moving = 0;//to start moving sphere
 static float moving_parameter = 0;
-static float curr_x = 0;
-
-static void show_message();
+static float curr_x = 0;//for sphere
+static int flag_color = 0;//we use flag to signal us to change color of sphere
 
 int main(int argc, char **argv)
 {
@@ -110,6 +109,7 @@ static void on_keyboard(unsigned char key, int x, int y)
         animation_parameter_moving = 0;
         number_of_cones = 0;
         curr_x = 0;
+        flag_color = 0;
         glutPostRedisplay();
         break;
     }
@@ -200,8 +200,13 @@ static void set_material(int num){
         case 2://red, for track
             diffuse_coeffs[0] = 1;
             break;
-        case 3://green, for sphere, start color
-            diffuse_coeffs[1] = 1;
+        case 3:
+            if(!flag_color)//green, for sphere, start color
+                diffuse_coeffs[1] = 1;
+            else{//if cone is in the same track as sphere we change sphere color, to alarm player
+                diffuse_coeffs[1] = diffuse_coeffs[1]-animation_parameter_moving/15;
+                diffuse_coeffs[0] = diffuse_coeffs[0] + animation_parameter_moving/15;//to go to purple color
+            }
             break;
         case 4://purple, for cones
             diffuse_coeffs[0] = 1;
@@ -213,11 +218,6 @@ static void set_material(int num){
     glMaterialfv(GL_FRONT, GL_DIFFUSE, diffuse_coeffs);
     glMaterialfv(GL_FRONT, GL_SPECULAR, specular_coeffs);
     glMaterialf(GL_FRONT, GL_SHININESS, shininess);
-}
-
-static void show_message()
-{
-    //TODO:to show poins and message
 }
 
 static void on_display(void)
@@ -287,6 +287,10 @@ static void on_display(void)
                 }
                 glTranslatef(x_coor_cone, 1.25, -4.5+animation_parameter_moving);//decreasing z-ose
                 glutSolidCone(0.1,0.5,20,20);
+                if(abs(x_coor_cone - curr_x)<=0.5)
+                    flag_color = 1;
+                else
+                    flag_color = 0;
                 //stop of animation when sphere and cone come to contant
                 if(abs(x_coor_cone - curr_x)<=0.5 && animation_parameter_moving >= 6.0){
                     animation_ongoing = 0;

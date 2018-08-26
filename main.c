@@ -31,6 +31,8 @@ static float moving_parameter = 0;
 static float curr_x = 0;//for sphere
 static int flag_color = 0;//we use flag to signal us to change color of sphere
 
+static int game_over = 0;
+
 int main(int argc, char **argv)
 {
     //window initialization
@@ -110,6 +112,7 @@ static void on_keyboard(unsigned char key, int x, int y)
         number_of_cones = 0;
         curr_x = 0;
         flag_color = 0;
+        game_over = 0;
         glutPostRedisplay();
         break;
     }
@@ -224,80 +227,167 @@ static void on_display(void)
 {
     //delete previous contents of the window
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    if(!game_over){
+        //define a viewing transformation
+        glMatrixMode(GL_MODELVIEW);
+        glLoadIdentity();
+        gluLookAt(0, 7, 7, 0, 0, 0, 0, 1, 0);
     
-    //define a viewing transformation
-    glMatrixMode(GL_MODELVIEW);
-    glLoadIdentity();
-    gluLookAt(0, 7, 7, 0, 0, 0, 0, 1, 0);
+        //light positiongrafika
+        GLfloat light_position[] = { 10, 10, 10, 0 };
+        glLightfv(GL_LIGHT0, GL_POSITION, light_position);
     
-    //light positiongrafika
-    GLfloat light_position[] = { 10, 10, 10, 0 };
-    glLightfv(GL_LIGHT0, GL_POSITION, light_position);
 
-
-    glPushMatrix();
-        //creating base
         glPushMatrix();
-            set_material(1);
-            glScalef(7, 1, 7);
-            glutSolidCube(1);
-        glPopMatrix();
-        //creating track
-        glPushMatrix();
-            set_material(2);
-            glTranslatef(2, 0.75, 0);
-            glScalef(2, 1, 14);
-            glutSolidCube(0.5);
-        glPopMatrix();
-        //creating track
-        glPushMatrix();
-            set_material(2);
-            glTranslatef(0, 0.75, 0);
-            glScalef(2, 1, 14);
-            glutSolidCube(0.5);
-        glPopMatrix();
-        //creating track
-        glPushMatrix();
-            set_material(2);
-            glTranslatef(-2, 0.75, 0);
-            glScalef(2, 1, 14);
-            glutSolidCube(0.5);
-        glPopMatrix();
-        //creation and translation of sphere
-        glPushMatrix();
-            set_material(3);
-            glTranslatef(0+curr_x, 1.75, 3.25);
-            glutSolidSphere(0.5, 50, 50);
-        glPopMatrix();
-        glPushMatrix();
-            set_material(4);
-            if(animation_ongoing){//when animation is active we make cones
-                if(animation_parameter_making){//when one cone is gone we make another one on random track using rand() function
-                    float rand_value = rand()/(float)RAND_MAX;//value is in [0,1] interval
-                    if(rand_value<=0.33){
-                        x_coor_cone = -2;
+            //creating base
+            glPushMatrix();
+                set_material(1);
+                glScalef(7, 1, 7);
+                glutSolidCube(1);
+            glPopMatrix();
+            //creating track
+            glPushMatrix();
+                set_material(2);
+                glTranslatef(2, 0.75, 0);
+                glScalef(2, 1, 14);
+                glutSolidCube(0.5);
+            glPopMatrix();
+            //creating track
+            glPushMatrix();
+                set_material(2);
+                glTranslatef(0, 0.75, 0);
+                glScalef(2, 1, 14);
+                glutSolidCube(0.5);
+            glPopMatrix();
+            //creating track
+            glPushMatrix();
+                set_material(2);
+                glTranslatef(-2, 0.75, 0);
+                glScalef(2, 1, 14);
+                glutSolidCube(0.5);
+            glPopMatrix();
+            //creation and translation of sphere
+            glPushMatrix();
+                set_material(3);
+                glTranslatef(0+curr_x, 1.75, 3.25);
+                glutSolidSphere(0.5, 50, 50);
+            glPopMatrix();
+            glPushMatrix();
+                set_material(4);
+                if(animation_ongoing){//when animation is active we make cones
+                    if(animation_parameter_making){//when one cone is gone we make another one on random track using rand() function
+                        float rand_value = rand()/(float)RAND_MAX;//value is in [0,1] interval
+                        if(rand_value<=0.33){
+                            x_coor_cone = -2;
+                        }
+                        else if(rand_value>=0.66){
+                            x_coor_cone = 2;
+                        }
+                        else{
+                            x_coor_cone = 0;
+                        }
+                        animation_parameter_making = 0;
                     }
-                    else if(rand_value>=0.66){
-                        x_coor_cone = 2;
+                    glTranslatef(x_coor_cone, 1.25, -4.5+animation_parameter_moving);//decreasing z-ose
+                    glutSolidCone(0.1,0.5,20,20);
+                    if(abs(x_coor_cone - curr_x)<=0.5)
+                        flag_color = 1;
+                    else
+                        flag_color = 0;
+                    //stop of animation when sphere and cone come to contant
+                    if(abs(x_coor_cone - curr_x)<=0.5 && animation_parameter_moving >= 6.0){
+                        animation_ongoing = 0;
+                        game_over = 1;
                     }
-                    else{
-                        x_coor_cone = 0;
-                    }
-                    animation_parameter_making = 0;
                 }
-                glTranslatef(x_coor_cone, 1.25, -4.5+animation_parameter_moving);//decreasing z-ose
-                glutSolidCone(0.1,0.5,20,20);
-                if(abs(x_coor_cone - curr_x)<=0.5)
-                    flag_color = 1;
-                else
-                    flag_color = 0;
-                //stop of animation when sphere and cone come to contant
-                if(abs(x_coor_cone - curr_x)<=0.5 && animation_parameter_moving >= 6.0){
-                    animation_ongoing = 0;
-                    //show_message();
-                }
-            }
+            glPopMatrix();
         glPopMatrix();
-    glPopMatrix();
+    }
+    else{
+        glMatrixMode(GL_MODELVIEW);
+        glLoadIdentity();
+        gluLookAt(0, 0, 10, 0, 0, 0, 0, 1, 0);
+    
+        //light positiongrafika
+        GLfloat light_position[] = { 10, 10, 10, 0 };
+        glLightfv(GL_LIGHT0, GL_POSITION, light_position);
+        
+        glLineWidth(12);
+        glBegin(GL_LINES);
+            //Y
+            glVertex3f(-4.80f, 4.00f, 0.00f);
+            glVertex3f(-4.00f, 3.00f, 0.00f);
+           
+            glVertex3f(-4.00f, 3.00f, 0.00f);
+            glVertex3f(-3.20f, 4.00f, 0.00f);
+       
+            glVertex3f(-4.00f, 3.00, 0.00f);
+            glVertex3f(-4.00f, 2.00f,0.00f);
+            //O
+            glVertex3f(-3.00f, 4.00f, 0.00f);
+            glVertex3f(-3.00f, 2.00f, 0.00f);
+            
+            glVertex3f(-3.00f, 2.080f, 0.00f);
+            glVertex3f(-2.00f, 2.080f, 0.00f);
+       
+            glVertex3f(-2.00f, 2.00, 0.00f);
+            glVertex3f(-2.00f, 4.00f,0.00f);
+            
+            glVertex3f(-2.00f, 3.930, 0.00f);
+            glVertex3f(-3.00f, 3.930f,0.00f);
+            //U
+            glVertex3f(-1.70f, 4.00f, 0.00f);
+            glVertex3f(-1.70f, 2.00f, 0.00f);
+       
+            glVertex3f(-1.70f, 2.080, 0.00f);
+            glVertex3f(-0.70f, 2.080f,0.00f);
+            
+            glVertex3f(-0.70f, 2.00, 0.00f);
+            glVertex3f(-0.70f, 4.00f,0.00f);
+            //L
+            glVertex3f(0.00f, 2.00f, 0.00f);
+            glVertex3f(0.00f, 4.00f, 0.00f);
+            
+            glVertex3f(0.00f, 2.080, 0.00f);
+            glVertex3f(1.00f, 2.080f,0.00f);
+            //O
+            glVertex3f(1.20f, 2.080f, 0.00f);
+            glVertex3f(2.20f, 2.080f, 0.00f);
+            
+            glVertex3f(2.20f, 2.00f, 0.00f);
+            glVertex3f(2.20f, 4.00f, 0.00f);
+       
+            glVertex3f(2.20f, 3.93f, 0.00f);
+            glVertex3f(1.20f, 3.93f,0.00f);
+            
+            glVertex3f(1.20f, 4.00f, 0.00f);
+            glVertex3f(1.20f, 2.00f,0.00f);
+            //S
+            glVertex3f(2.40f, 2.080f, 0.00f);
+            glVertex3f(3.40f, 2.080f, 0.00f);
+            
+            glVertex3f(3.33f, 2.00f, 0.00f);
+            glVertex3f(3.33f, 3.00f, 0.00f);
+       
+            glVertex3f(3.40f, 3.00f, 0.00f);
+            glVertex3f(2.40f, 3.00f,0.00f);
+            
+            glVertex3f(2.48f, 3.00f, 0.00f);
+            glVertex3f(2.48f, 4.00f,0.00f);
+            
+            glVertex3f(2.40f, 3.93f, 0.00f);
+            glVertex3f(3.40f, 3.93f,0.00f);
+            //T
+            glVertex3f(4.30f, 2.00f, 0.00f);
+            glVertex3f(4.30f, 4.00f,0.00f);
+            
+            glVertex3f(3.50f, 3.93f, 0.00f);
+            glVertex3f(5.10f, 3.93f,0.00f);
+            
+            //TODO: to show one, two or tree sphere, that depends of number of cones that player managed to escape.
+            
+        glEnd();
+            
+    }
     glutSwapBuffers();
 }

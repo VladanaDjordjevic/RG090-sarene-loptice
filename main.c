@@ -215,6 +215,11 @@ static void set_material(int num){
             diffuse_coeffs[0] = 1;
             diffuse_coeffs[2] = 1;
             break;
+        case 5://for rating stars
+            diffuse_coeffs[0] = 1;
+            diffuse_coeffs[1] = 1;
+            diffuse_coeffs[2] = 0;
+            break;
     }
 
     glMaterialfv(GL_FRONT, GL_AMBIENT, ambient_coeffs);
@@ -303,12 +308,12 @@ static void on_display(void)
             glPopMatrix();
         glPopMatrix();
     }
-    else{
+    else{//this part of code is active if player lost the game, it will show : "YOU LOST"
         glMatrixMode(GL_MODELVIEW);
         glLoadIdentity();
         gluLookAt(0, 0, 10, 0, 0, 0, 0, 1, 0);
     
-        //light positiongrafika
+        //light position
         GLfloat light_position[] = { 10, 10, 10, 0 };
         glLightfv(GL_LIGHT0, GL_POSITION, light_position);
         
@@ -383,11 +388,113 @@ static void on_display(void)
             
             glVertex3f(3.50f, 3.93f, 0.00f);
             glVertex3f(5.10f, 3.93f,0.00f);
-            
-            //TODO: to show one, two or tree sphere, that depends of number of cones that player managed to escape.
-            
         glEnd();
-            
+        set_material(5);    
+        if(number_of_cones > 3){
+            glBegin (GL_POLYGON);
+                glVertex3f(0.30f,-2.00f,0.00f);
+                glVertex3f(0.50f,-2.50f,0.00f);
+                glVertex3f(0.00f,-2.80f,0.00f);
+                glVertex3f(-0.50f,-2.50f,0.00f);
+                glVertex3f(-0.30f,-2.00f,0.00f);
+            glEnd();
+            glBegin(GL_POLYGON);
+                glVertex3f(0.00,-1.00f,0.00f);
+                glVertex3f(0.30f,-2.00f,0.00f);
+                glVertex3f(-0.30f,-2.00f,0.00f);
+            glEnd();
+            glBegin(GL_POLYGON);
+                glVertex3f(0.30f,-2.00f,0.00f);
+                glVertex3f(1.20f,-2.00f,0.00f);
+                glVertex3f(0.50f,-2.50f,0.00f);
+            glEnd();
+            glBegin(GL_POLYGON);
+                glVertex3f(0.50f,-2.50f,0.00f);
+                glVertex3f(0.90f,-3.50f,0.00f);
+                glVertex3f(0.00f,-2.80f,0.00f);
+            glEnd();
+            glBegin(GL_POLYGON);
+                glVertex3f(0.00f,-2.80f,0.00f);
+                glVertex3f(-0.90f,-3.50f,0.00f);
+                glVertex3f(-0.50f,-2.50f,0.00f);
+            glEnd();
+            glBegin(GL_POLYGON);
+                glVertex3f(-0.50f,-2.50f,0.00f);
+                glVertex3f(-1.20f,-2.00f,0.00f);
+                glVertex3f(-0.30f,-2.00f,0.00f);
+            glEnd();
+        }
+        if(number_of_cones > 10){
+            glTranslatef(-2.5, 0, 0);
+             glBegin (GL_POLYGON);
+                glVertex3f(0.30f,-2.00f,0.00f);
+                glVertex3f(0.50f,-2.50f,0.00f);
+                glVertex3f(0.00f,-2.80f,0.00f);
+                glVertex3f(-0.50f,-2.50f,0.00f);
+                glVertex3f(-0.30f,-2.00f,0.00f);
+            glEnd();
+            glBegin(GL_POLYGON);
+                glVertex3f(0.00,-1.00f,0.00f);
+                glVertex3f(0.30f,-2.00f,0.00f);
+                glVertex3f(-0.30f,-2.00f,0.00f);
+            glEnd();
+            glBegin(GL_POLYGON);
+                glVertex3f(0.30f,-2.00f,0.00f);
+                glVertex3f(1.20f,-2.00f,0.00f);
+                glVertex3f(0.50f,-2.50f,0.00f);
+            glEnd();
+            glBegin(GL_POLYGON);
+                glVertex3f(0.50f,-2.50f,0.00f);
+                glVertex3f(0.90f,-3.50f,0.00f);
+                glVertex3f(0.00f,-2.80f,0.00f);
+            glEnd();
+            glBegin(GL_POLYGON);
+                glVertex3f(0.00f,-2.80f,0.00f);
+                glVertex3f(-0.90f,-3.50f,0.00f);
+                glVertex3f(-0.50f,-2.50f,0.00f);
+            glEnd();
+            glBegin(GL_POLYGON);
+                glVertex3f(-0.50f,-2.50f,0.00f);
+                glVertex3f(-1.20f,-2.00f,0.00f);
+                glVertex3f(-0.30f,-2.00f,0.00f);
+            glEnd();
+        }
+        if(number_of_cones > 20){
+            glTranslatef(5, 0, 0);
+             glBegin (GL_POLYGON);
+                glVertex3f(0.30f,-2.00f,0.00f);
+                glVertex3f(0.50f,-2.50f,0.00f);
+                glVertex3f(0.00f,-2.80f,0.00f);
+                glVertex3f(-0.50f,-2.50f,0.00f);
+                glVertex3f(-0.30f,-2.00f,0.00f);
+            glEnd();
+            glBegin(GL_POLYGON);
+                glVertex3f(0.00,-1.00f,0.00f);
+                glVertex3f(0.30f,-2.00f,0.00f);
+                glVertex3f(-0.30f,-2.00f,0.00f);
+            glEnd();
+            glBegin(GL_POLYGON);
+                glVertex3f(0.30f,-2.00f,0.00f);
+                glVertex3f(1.20f,-2.00f,0.00f);
+                glVertex3f(0.50f,-2.50f,0.00f);
+            glEnd();
+            glBegin(GL_POLYGON);
+                glVertex3f(0.50f,-2.50f,0.00f);
+                glVertex3f(0.90f,-3.50f,0.00f);
+                glVertex3f(0.00f,-2.80f,0.00f);
+            glEnd();
+            glBegin(GL_POLYGON);
+                glVertex3f(0.00f,-2.80f,0.00f);
+                glVertex3f(-0.90f,-3.50f,0.00f);
+                glVertex3f(-0.50f,-2.50f,0.00f);
+            glEnd();
+            glBegin(GL_POLYGON);
+                glVertex3f(-0.50f,-2.50f,0.00f);
+                glVertex3f(-1.20f,-2.00f,0.00f);
+                glVertex3f(-0.30f,-2.00f,0.00f);
+            glEnd();
+        }
+        //TODO: to show one, two or tree sphere, that depends of number of cones that player managed to escape.
     }
     glutSwapBuffers();
 }

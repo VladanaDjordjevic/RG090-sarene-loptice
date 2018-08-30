@@ -31,6 +31,10 @@ static float moving_parameter = 0;
 static float curr_x = 0;//for sphere
 static int flag_color = 0;//we use flag to signal us to change color of sphere
 
+static float rotation_parameter1 = 0;//parameter for rotation around y-axis
+static float rotation_parameter2 = 0;//parameter for rotation around x-axis
+static int direction_change = 1;//to change direction of rotation around x-axis
+
 static int game_over = 0;
 
 int main(int argc, char **argv)
@@ -113,17 +117,29 @@ static void on_keyboard(unsigned char key, int x, int y)
         curr_x = 0;
         flag_color = 0;
         game_over = 0;
+        rotation_parameter1 = 0;
+        rotation_parameter2 = 0;
         glutPostRedisplay();
         break;
     }
 }
+//function to start animation, signal to make cone
 static void on_timer1(int value){
     if(TIMER_ID1 != value)
         return;
     
-    animation_parameter_moving += 0.2;
+    animation_parameter_moving += 0.1+number_of_cones*0.005;
+    rotation_parameter1 += 0.15;
+    rotation_parameter2 += 0.1*direction_change;
+    //our rotation will go from 20 to -20 
+    if(rotation_parameter2>=20){//direction change when we go over 20
+        direction_change = - direction_change;
+    }
+    else if(rotation_parameter2<=-20){//direction change when we go below -20
+        direction_change = - direction_change;
+    }
 
-    if(animation_parameter_moving>=7){
+    if(animation_parameter_moving>=7){//to stop cone from moving off track and behind the sphere
         animation_parameter_moving = 0;
         animation_parameter_making = 1;
         number_of_cones += 1; 
@@ -241,8 +257,11 @@ static void on_display(void)
         //light positiongrafika
         GLfloat light_position[] = { 10, 10, 10, 0 };
         glLightfv(GL_LIGHT0, GL_POSITION, light_position);
-    
-
+        
+        //rotation of scene to make game harder to play
+        glRotatef(rotation_parameter1, 0, 1, 0);//y-axis
+        glRotatef(rotation_parameter2, 1, 0, 0);//x-axis
+        
         glPushMatrix();
             //creating base
             glPushMatrix();
@@ -274,7 +293,7 @@ static void on_display(void)
             //creation and translation of sphere
             glPushMatrix();
                 set_material(3);
-                glTranslatef(0+curr_x, 1.75, 3.25);
+                glTranslatef(0+curr_x, 1.75, 3.00);
                 glutSolidSphere(0.5, 50, 50);
             glPopMatrix();
             glPushMatrix();
@@ -308,7 +327,7 @@ static void on_display(void)
             glPopMatrix();
         glPopMatrix();
     }
-    else{//this part of code is active if player lost the game, it will show : "YOU LOST"
+    else{//this part of code is active if player lost the game, it will show : "YOU LOST" and one, two or three stars
         glMatrixMode(GL_MODELVIEW);
         glLoadIdentity();
         gluLookAt(0, 0, 10, 0, 0, 0, 0, 1, 0);
@@ -316,9 +335,9 @@ static void on_display(void)
         //light position
         GLfloat light_position[] = { 10, 10, 10, 0 };
         glLightfv(GL_LIGHT0, GL_POSITION, light_position);
-        
+        set_material(2);//set material for lines
         glLineWidth(12);
-        glBegin(GL_LINES);
+        glBegin(GL_LINES);//making letters
             //Y
             glVertex3f(-4.80f, 4.00f, 0.00f);
             glVertex3f(-4.00f, 3.00f, 0.00f);
@@ -390,111 +409,110 @@ static void on_display(void)
             glVertex3f(5.10f, 3.93f,0.00f);
         glEnd();
         set_material(5);    
-        if(number_of_cones > 3){
-            glBegin (GL_POLYGON);
+        if(number_of_cones > 3){//showing one star if number of cones is higher then 3
+            glBegin (GL_POLYGON);//making of pentagon for star
                 glVertex3f(0.30f,-2.00f,0.00f);
                 glVertex3f(0.50f,-2.50f,0.00f);
                 glVertex3f(0.00f,-2.80f,0.00f);
                 glVertex3f(-0.50f,-2.50f,0.00f);
                 glVertex3f(-0.30f,-2.00f,0.00f);
             glEnd();
-            glBegin(GL_POLYGON);
+            glBegin(GL_POLYGON);//making of triangle for star
                 glVertex3f(0.00,-1.00f,0.00f);
                 glVertex3f(0.30f,-2.00f,0.00f);
                 glVertex3f(-0.30f,-2.00f,0.00f);
             glEnd();
-            glBegin(GL_POLYGON);
+            glBegin(GL_POLYGON);//making of triangle for star
                 glVertex3f(0.30f,-2.00f,0.00f);
                 glVertex3f(1.20f,-2.00f,0.00f);
                 glVertex3f(0.50f,-2.50f,0.00f);
             glEnd();
-            glBegin(GL_POLYGON);
+            glBegin(GL_POLYGON);//making of triangle for star
                 glVertex3f(0.50f,-2.50f,0.00f);
                 glVertex3f(0.90f,-3.50f,0.00f);
                 glVertex3f(0.00f,-2.80f,0.00f);
             glEnd();
-            glBegin(GL_POLYGON);
+            glBegin(GL_POLYGON);//making of triangle for star
                 glVertex3f(0.00f,-2.80f,0.00f);
                 glVertex3f(-0.90f,-3.50f,0.00f);
                 glVertex3f(-0.50f,-2.50f,0.00f);
             glEnd();
-            glBegin(GL_POLYGON);
+            glBegin(GL_POLYGON);//making of triangle for star
                 glVertex3f(-0.50f,-2.50f,0.00f);
                 glVertex3f(-1.20f,-2.00f,0.00f);
                 glVertex3f(-0.30f,-2.00f,0.00f);
             glEnd();
         }
-        if(number_of_cones > 10){
+        if(number_of_cones > 10){//showing two stars if number of cones is higher then 10
             glTranslatef(-2.5, 0, 0);
-             glBegin (GL_POLYGON);
+             glBegin (GL_POLYGON);//making of pentagon for star
                 glVertex3f(0.30f,-2.00f,0.00f);
                 glVertex3f(0.50f,-2.50f,0.00f);
                 glVertex3f(0.00f,-2.80f,0.00f);
                 glVertex3f(-0.50f,-2.50f,0.00f);
                 glVertex3f(-0.30f,-2.00f,0.00f);
             glEnd();
-            glBegin(GL_POLYGON);
+            glBegin(GL_POLYGON);//making of triangle for star
                 glVertex3f(0.00,-1.00f,0.00f);
                 glVertex3f(0.30f,-2.00f,0.00f);
                 glVertex3f(-0.30f,-2.00f,0.00f);
             glEnd();
-            glBegin(GL_POLYGON);
+            glBegin(GL_POLYGON);//making of triangle for star
                 glVertex3f(0.30f,-2.00f,0.00f);
                 glVertex3f(1.20f,-2.00f,0.00f);
                 glVertex3f(0.50f,-2.50f,0.00f);
             glEnd();
-            glBegin(GL_POLYGON);
+            glBegin(GL_POLYGON);//making of triangle for star
                 glVertex3f(0.50f,-2.50f,0.00f);
                 glVertex3f(0.90f,-3.50f,0.00f);
                 glVertex3f(0.00f,-2.80f,0.00f);
             glEnd();
-            glBegin(GL_POLYGON);
+            glBegin(GL_POLYGON);//making of triangle for star
                 glVertex3f(0.00f,-2.80f,0.00f);
                 glVertex3f(-0.90f,-3.50f,0.00f);
                 glVertex3f(-0.50f,-2.50f,0.00f);
             glEnd();
-            glBegin(GL_POLYGON);
+            glBegin(GL_POLYGON);//making of triangle for star
                 glVertex3f(-0.50f,-2.50f,0.00f);
                 glVertex3f(-1.20f,-2.00f,0.00f);
                 glVertex3f(-0.30f,-2.00f,0.00f);
             glEnd();
         }
-        if(number_of_cones > 20){
+        if(number_of_cones > 20){//showing three stars if number of cones is higher then 20
             glTranslatef(5, 0, 0);
-             glBegin (GL_POLYGON);
+             glBegin (GL_POLYGON);//making of pentagon for star
                 glVertex3f(0.30f,-2.00f,0.00f);
                 glVertex3f(0.50f,-2.50f,0.00f);
                 glVertex3f(0.00f,-2.80f,0.00f);
                 glVertex3f(-0.50f,-2.50f,0.00f);
                 glVertex3f(-0.30f,-2.00f,0.00f);
             glEnd();
-            glBegin(GL_POLYGON);
+            glBegin(GL_POLYGON);//making of triangle for star
                 glVertex3f(0.00,-1.00f,0.00f);
                 glVertex3f(0.30f,-2.00f,0.00f);
                 glVertex3f(-0.30f,-2.00f,0.00f);
             glEnd();
-            glBegin(GL_POLYGON);
+            glBegin(GL_POLYGON);//making of triangle for star
                 glVertex3f(0.30f,-2.00f,0.00f);
                 glVertex3f(1.20f,-2.00f,0.00f);
                 glVertex3f(0.50f,-2.50f,0.00f);
             glEnd();
-            glBegin(GL_POLYGON);
+            glBegin(GL_POLYGON);//making of triangle for star
                 glVertex3f(0.50f,-2.50f,0.00f);
                 glVertex3f(0.90f,-3.50f,0.00f);
                 glVertex3f(0.00f,-2.80f,0.00f);
             glEnd();
-            glBegin(GL_POLYGON);
+            glBegin(GL_POLYGON);//making of triangle for star
                 glVertex3f(0.00f,-2.80f,0.00f);
                 glVertex3f(-0.90f,-3.50f,0.00f);
                 glVertex3f(-0.50f,-2.50f,0.00f);
             glEnd();
-            glBegin(GL_POLYGON);
+            glBegin(GL_POLYGON);//making of triangle for star
                 glVertex3f(-0.50f,-2.50f,0.00f);
                 glVertex3f(-1.20f,-2.00f,0.00f);
                 glVertex3f(-0.30f,-2.00f,0.00f);
             glEnd();
         }
-        //TODO: to show one, two or tree sphere, that depends of number of cones that player managed to escape.
     }
     glutSwapBuffers();
 }

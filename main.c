@@ -25,6 +25,7 @@ static void drawCone();
 static void drawCube();
 static void drawLosingMessage();
 static void drawStars();
+static void printPoints(float x, float y, float z);
 
 static int animation_ongoing = 0;//to start animation
 static float animation_parameter_moving = 0;//to move cone and cube
@@ -44,7 +45,7 @@ static float rotation_parameter1 = 0;//parameter for rotation around y-axis
 static float rotation_parameter2 = 0;//parameter for rotation around x-axis
 static int direction_change = 1;//to change direction of rotation around x-axis
 
-static int game_over = 0;////flag to stop of animation when sphere and cone come to contant
+static int game_over = 0;//flag to stop animation when sphere and cone come to contant
 
 int main(int argc, char **argv)
 {
@@ -138,7 +139,7 @@ static void on_timer1(int value){
     if(TIMER_ID1 != value)
         return;
     
-    animation_parameter_moving += 0.1+number_of_cones*0.005;
+    animation_parameter_moving += 0.085+number_of_cones*0.005;//number_of_cones will increase, so we use that to increase speed with time
     rotation_parameter1 += 0.15;
     rotation_parameter2 += 0.1*direction_change;
     //our rotation will go from 20 to -20 
@@ -161,7 +162,7 @@ static void on_timer1(int value){
         glutTimerFunc(TIMER_ID1, on_timer1, TIMER_ID1);
     }
 }
-//function to move to the left, decreasing x coordinates
+//function to move to the left, decreasing x coordinate
 static void on_timer2(int value){
     if(TIMER_ID2 != value)
         return;
@@ -181,7 +182,7 @@ static void on_timer2(int value){
         glutTimerFunc(TIMER_ID2, on_timer2, TIMER_ID2);
     }
 }
-//function to move to the right, by increasing x coordinates
+//function to move to the right, by increasing x coordinate
 static void on_timer3(int value){
     if(TIMER_ID3 != value)
         return;
@@ -203,7 +204,6 @@ static void on_timer3(int value){
     }
 }
 
-//function when window dimension is changed
 static void on_reshape(int width, int height)
 {   
     window_width = width;
@@ -227,7 +227,7 @@ static void set_material(int num){
         case 1: //blue, for base
             diffuse_coeffs[2] = 1;
             break;
-        case 2://red, for track
+        case 2://red, for tracks
             diffuse_coeffs[0] = 1;
             break;
         case 3:if(flag_color == 1){//if cone is in the same track as sphere we change sphere color, to alarm the player
@@ -245,7 +245,7 @@ static void set_material(int num){
             diffuse_coeffs[0] = 1;
             diffuse_coeffs[2] = 1;
             break;
-        case 5://for rating stars
+        case 5://yellow, for rating stars and cubes
             diffuse_coeffs[0] = 1;
             diffuse_coeffs[1] = 1;
             diffuse_coeffs[2] = 0;
@@ -313,7 +313,7 @@ static void drawCone(){
                 }
                 animation_parameter_making_cone = 0;
             }
-            glTranslatef(x_coor_cone, 1.25, -4.5+animation_parameter_moving);//decreasing z-ose
+            glTranslatef(x_coor_cone, 1.25, -4.5+animation_parameter_moving);//increasing z-ose
             glutSolidCone(0.1,0.5,20,20);
             flag_color = 0;
             if(abs(x_coor_cone - curr_x)<=0.5)
@@ -343,13 +343,13 @@ static void drawCube(){
                     else{
                         x_coor_cube = 0;
                     }
-                    if(x_coor_cone != x_coor_cube){//for cube and cone, we want then to be on different tracks, so we use 'while' loop until coordinates are different
+                    if(x_coor_cone != x_coor_cube){//for cube and cone, we want for them to be on different tracks, so we use 'while' loop until coordinates are different
                         same_x_coor_as_cone = 0;
                     }
                 }
                 animation_parameter_making_cube = 0;
             }
-            glTranslatef(x_coor_cube, 1.25, -4.5+animation_parameter_moving);//decreasing z-ose
+            glTranslatef(x_coor_cube, 1.25, -4.5+animation_parameter_moving);//increasing z-ose
             glutSolidCube(0.2);
             if(abs(x_coor_cube - curr_x)<=0.5)
                 flag_color = 2;
@@ -363,8 +363,8 @@ static void drawCube(){
 static void drawLosingMessage(){
     set_material(2);//set material for lines
     glLineWidth(12);
-    glBegin(GL_LINES);//making letters
-        //Y
+    glBegin(GL_LINES);//making letters, we are not using glutBitmapCharacter function because we want bigger font
+        // letter 'Y'
         glVertex3f(-4.80f, 4.00f, 0.00f);
         glVertex3f(-4.00f, 3.00f, 0.00f);
         
@@ -373,7 +373,7 @@ static void drawLosingMessage(){
     
         glVertex3f(-4.00f, 3.00, 0.00f);
         glVertex3f(-4.00f, 2.00f,0.00f);
-        //O
+        //'O'
         glVertex3f(-3.00f, 4.00f, 0.00f);
         glVertex3f(-3.00f, 2.00f, 0.00f);
         
@@ -385,7 +385,7 @@ static void drawLosingMessage(){
         
         glVertex3f(-2.00f, 3.930, 0.00f);
         glVertex3f(-3.00f, 3.930f,0.00f);
-        //U
+        //'U'
         glVertex3f(-1.70f, 4.00f, 0.00f);
         glVertex3f(-1.70f, 2.00f, 0.00f);
     
@@ -394,13 +394,13 @@ static void drawLosingMessage(){
         
         glVertex3f(-0.70f, 2.00, 0.00f);
         glVertex3f(-0.70f, 4.00f,0.00f);
-        //L
+        //'L'
         glVertex3f(0.00f, 2.00f, 0.00f);
         glVertex3f(0.00f, 4.00f, 0.00f);
         
         glVertex3f(0.00f, 2.080, 0.00f);
         glVertex3f(1.00f, 2.080f,0.00f);
-        //O
+        //'O'
         glVertex3f(1.20f, 2.080f, 0.00f);
         glVertex3f(2.20f, 2.080f, 0.00f);
         
@@ -412,7 +412,7 @@ static void drawLosingMessage(){
         
         glVertex3f(1.20f, 4.00f, 0.00f);
         glVertex3f(1.20f, 2.00f,0.00f);
-        //S
+        //'S'
         glVertex3f(2.40f, 2.080f, 0.00f);
         glVertex3f(3.40f, 2.080f, 0.00f);
         
@@ -427,7 +427,7 @@ static void drawLosingMessage(){
         
         glVertex3f(2.40f, 3.93f, 0.00f);
         glVertex3f(3.40f, 3.93f,0.00f);
-        //T
+        //'T'
         glVertex3f(4.30f, 2.00f, 0.00f);
         glVertex3f(4.30f, 4.00f,0.00f);
         
@@ -436,6 +436,7 @@ static void drawLosingMessage(){
     glEnd();
 }
 static void drawStars(){
+    glPushMatrix();
     set_material(5);    
     if(number_of_cube > 3){//showing one star if number of cones is higher then 3
         glBegin (GL_POLYGON);//making of pentagon for star
@@ -541,6 +542,21 @@ static void drawStars(){
             glVertex3f(-0.30f,-2.00f,0.00f);
         glEnd();
     }
+    glPopMatrix();
+}
+//function that will print number of points won in the game
+static void printPoints(float x, float y, float z){
+    
+    glPushMatrix();
+	glDisable(GL_LIGHTING);//we disable lighting to set color for letters
+	glColor3f(1.0, 1.0, 1.0);
+        char *c, text[20];
+        sprintf(text, "Points: %d", number_of_cube);
+        glRasterPos3f(x, y, z);
+        for (c=text; *c != '\0'; c++) 
+            glutBitmapCharacter(GLUT_BITMAP_HELVETICA_18, *c);
+        glEnable(GL_LIGHTING);
+    glPopMatrix();
 }
 static void on_display(void)
 {
@@ -556,18 +572,21 @@ static void on_display(void)
         GLfloat light_position[] = { 10, 10, 10, 0 };
         glLightfv(GL_LIGHT0, GL_POSITION, light_position);
         
-        //rotation of scene to make game harder to play
-        glRotatef(rotation_parameter1, 0, 1, 0);//y-axis
-        glRotatef(rotation_parameter2, 1, 0, 0);//x-axis
-        
         glPushMatrix();
-            drawBase();
-            drawSphere();
-            drawCone();
-            drawCube();
+            //rotation of scene to make game harder to play
+            glRotatef(rotation_parameter1, 0, 1, 0);//y-axis
+            glRotatef(rotation_parameter2, 1, 0, 0);//x-axis
+        
+            glPushMatrix();
+                drawBase();
+                drawSphere();
+                drawCone();
+                drawCube();
+            glPopMatrix();
         glPopMatrix();
+        printPoints(-3.5, 4.5, 0);
     }
-    else{//this part of code is active if player lost the game, it will show : "YOU LOST" and one, two or three stars
+    else{//this part of code is active if player lost the game, it will show : "YOU LOST" and one, two or three stars with number of points
         glMatrixMode(GL_MODELVIEW);
         glLoadIdentity();
         gluLookAt(0, 0, 10, 0, 0, 0, 0, 1, 0);
@@ -577,6 +596,7 @@ static void on_display(void)
         glLightfv(GL_LIGHT0, GL_POSITION, light_position);
         drawLosingMessage();
         drawStars();
+        printPoints(-0.5, 0, 0);
     }
     glutSwapBuffers();
 }
